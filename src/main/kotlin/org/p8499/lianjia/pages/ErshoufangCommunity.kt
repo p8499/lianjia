@@ -11,21 +11,24 @@ class ErshoufangCommunity(val community: String, val sort: Int, val page: Int) {
     private lateinit var javascriptExecutor: JavascriptExecutor
 
     fun load(wDriver: WebDriver) {
-        wDriver.navigate().retryTo("https://sh.lianjia.com/ershoufang/pg${page}co${sort}c$community")
+        "https://sh.lianjia.com/ershoufang/pg${page}co${sort}c$community/"
+                .takeIf { wDriver.currentUrl != it }
+                ?.also { wDriver.navigate().retryTo(it) }
         webDriver = wDriver
         javascriptExecutor = webDriver as JavascriptExecutor
     }
 
     fun name() = webDriver
-        .findElement(By.className("agentCardResblockTitle"))
-        .text
+            .findElementOrNull(By.className("agentCardResblockTitle"))
+            ?.text ?: ""
 
     fun lowestUnitPrice() = webDriver
-        .findElementOrNull(By.className("sellListContent"))
-        ?.findElement(By.xpath("li[1]"))
-        ?.findElement(By.className("info"))
-        ?.findElement(By.className("priceInfo"))
-        ?.findElement(By.className("unitPrice"))
-        ?.findElement(By.tagName("span"))
-        ?.text?.substringBefore("元/平")?.replace(",","")?.toInt()
+            .findElementOrNull(By.className("sellListContent"))
+            ?.findElements(By.xpath("li[@data-lj_action_resblock_id=\"$community\"]"))
+            ?.firstOrNull()
+            ?.findElementOrNull(By.className("info"))
+            ?.findElementOrNull(By.className("priceInfo"))
+            ?.findElementOrNull(By.className("unitPrice"))
+            ?.findElementOrNull(By.tagName("span"))
+            ?.text?.substringBefore("元/平")?.replace(",", "")?.toInt()
 }

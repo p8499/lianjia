@@ -13,36 +13,38 @@ class ChengjiaoCommunity(val community: String, val page: Int) {
     private lateinit var javascriptExecutor: JavascriptExecutor
 
     fun load(wDriver: WebDriver) {
-        wDriver.navigate().retryTo("https://sh.lianjia.com/chengjiao/pg${page}c$community")
+        "https://sh.lianjia.com/chengjiao/pg${page}c$community/"
+                .takeIf { wDriver.currentUrl != it }
+                ?.also { wDriver.navigate().retryTo(it) }
         webDriver = wDriver
         javascriptExecutor = webDriver as JavascriptExecutor
     }
 
     fun unitPriceList(): List<Int> = webDriver
-        .findElementOrNull(By.className("listContent"))
-        ?.findElements(By.tagName("li"))
-        ?.asSequence()
-        ?.map { it.findElement(By.className("info")) }
-        ?.map { it.findElement(By.className("flood")) }
-        ?.map { it.findElement(By.className("unitPrice")) }
-        ?.map { it.findElement(By.className("number")) }
-        ?.map { it.text.dropWhile { it == ',' }.toInt() }
-        ?.toList() ?: listOf()
+            .findElementOrNull(By.className("listContent"))
+            ?.findElements(By.tagName("li"))
+            ?.asSequence()
+            ?.map { it.findElement(By.className("info")) }
+            ?.map { it.findElement(By.className("flood")) }
+            ?.map { it.findElement(By.className("unitPrice")) }
+            ?.map { it.findElement(By.className("number")) }
+            ?.map { it.text.dropWhile { it == ',' }.toInt() }
+            ?.toList() ?: listOf()
 
     fun recentUnitPriceList(): List<Int> = webDriver
-        .findElementOrNull(By.className("listContent"))
-        ?.findElements(By.tagName("li"))
-        ?.asSequence()
-        ?.map { it.findElement(By.className("info")) }
-        ?.filter {
-            it.findElement(By.className("address"))
-                .findElement(By.className("dealDate"))
-                .text.let(::toLocalDate).isAfter(LocalDate.now().minusMonths(12))
-        }?.map { it.findElement(By.className("flood")) }
-        ?.map { it.findElement(By.className("unitPrice")) }
-        ?.map { it.findElement(By.className("number")) }
-        ?.map { it.text.replace(",", "").toInt() }
-        ?.toList() ?: listOf()
+            .findElementOrNull(By.className("listContent"))
+            ?.findElements(By.tagName("li"))
+            ?.asSequence()
+            ?.map { it.findElement(By.className("info")) }
+            ?.filter {
+                it.findElementOrNull(By.className("address"))
+                        ?.findElementOrNull(By.className("dealDate"))
+                        ?.text?.let(::toLocalDate)?.isAfter(LocalDate.now().minusMonths(12)) == true
+            }?.mapNotNull { it.findElementOrNull(By.className("flood")) }
+            ?.mapNotNull { it.findElementOrNull(By.className("unitPrice")) }
+            ?.mapNotNull { it.findElementOrNull(By.className("number")) }
+            ?.mapNotNull { it.text.replace(",", "").toInt() }
+            ?.toList() ?: listOf()
 
     fun toLocalDate(str: String) = LocalDate.parse(str, DateTimeFormatter.ofPattern("yyyy.MM.dd"))
 }

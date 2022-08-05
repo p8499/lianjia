@@ -30,11 +30,15 @@ fun sellingCommunityList(webDriver: WebDriver, street: String): List<String> {
     return list
 }
 
-fun lowestUnitPrice(webDriver: WebDriver, community: String) = ErshoufangCommunity(community, 41, 1).apply {
+fun communityLowestPrice(webDriver: WebDriver, community: String) = ErshoufangCommunity(community, 41, 1).apply {
     load(webDriver)
 }.lowestUnitPrice()
 
-fun recentDealUnitPriceList(webDriver: WebDriver, community: String): List<Int> {
+fun communityName(webDriver: WebDriver, community: String) = ErshoufangCommunity(community, 41, 1).apply {
+    load(webDriver)
+}.name()
+
+fun communityHistoryPriceList(webDriver: WebDriver, community: String): List<Int> {
     val list: MutableList<Int> = mutableListOf()
     var page = 1
     while (true) {

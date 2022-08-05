@@ -13,7 +13,9 @@ class Home {
     private lateinit var javascriptExecutor: JavascriptExecutor
 
     fun load(wDriver: WebDriver) {
-        wDriver.navigate().retryTo("https://sh.lianjia.com")
+        "https://sh.lianjia.com/"
+                .takeIf { wDriver.currentUrl != it }
+                ?.also { wDriver.navigate().retryTo(it) }
         webDriver = wDriver
         javascriptExecutor = webDriver as JavascriptExecutor
     }
@@ -30,9 +32,9 @@ class Home {
         webDriver.findElement(By.className("login_submit")).click()
 
         webDriverWait.until(
-            ExpectedConditions.refreshed(
-                ExpectedConditions.stalenessOf(webDriver.findElement(By.className("login_submit")))
-            )
+                ExpectedConditions.refreshed(
+                        ExpectedConditions.stalenessOf(webDriver.findElement(By.className("login_submit")))
+                )
         )
     }
 }
